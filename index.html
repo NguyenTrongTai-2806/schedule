@@ -3,17 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thời Khóa Biểu</title>
+    <title>Thời Khóa Biểu: Galaxy Ultra (Classic Cursor)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --school-color: #29bca4;
-            --tutor-color: #ff7b9b;
-            --personal-color: #8a63d2;
-            --text-color: #f0f0f0;
-            --sub-text-color: #cccccc;
+            --school-color: #00ffcc;
+            --tutor-color: #ff006e;
+            --personal-color: #8b5cf6;
+            --school-rgb: 0, 255, 204;
+            --tutor-rgb: 255, 0, 110;
+            --personal-rgb: 139, 92, 246;
+            --text-color: #ffffff;
+            --sub-text-color: #b8b8b8;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -22,278 +25,295 @@
             font-family: 'Poppins', sans-serif;
             min-height: 100vh;
             color: var(--text-color);
-            background-color: #020412; 
+            background: #000;
             overflow: hidden;
             cursor: none;
         }
 
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 10000; display: flex;
+            justify-content: center; align-items: center;
+            transition: opacity 1s, visibility 1s;
+        }
+        .loading-screen.hidden { opacity: 0; visibility: hidden; }
+        .loader { width: 150px; height: 150px; position: relative; }
+        .loader-ring {
+            position: absolute; width: 100%; height: 100%; border-radius: 50%;
+            border: 3px solid transparent; border-top-color: var(--school-color);
+            animation: spin 1s linear infinite;
+        }
+        .loader-ring:nth-child(2) {
+            width: 80%; height: 80%; top: 10%; left: 10%;
+            border-top-color: var(--tutor-color); animation: spin 1.5s linear reverse infinite;
+        }
+        .loader-ring:nth-child(3) {
+            width: 60%; height: 60%; top: 20%; left: 20%;
+            border-top-color: var(--personal-color); animation: spin 2s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* NÂNG CẤP 1: Con trỏ chuột được hoàn nguyên */
         .cursor {
-            width: 25px; height: 25px;
+            width: 25px;
+            height: 25px;
             background-color: rgba(255, 255, 255, 0.8);
             border-radius: 50%;
-            position: fixed; pointer-events: none;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
             transform: translate(-50%, -50%);
-            z-index: 1000;
             transition: transform 0.2s ease-out, box-shadow 0.2s, background-color 0.2s, width 0.2s, height 0.2s;
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.7), 0 0 25px rgba(255, 255, 255, 0.5);
         }
         .cursor.grow {
-            width: 60px; height: 60px;
+            width: 60px;
+            height: 60px;
             background-color: rgba(255, 255, 255, 0.2);
             box-shadow: 0 0 25px rgba(255, 255, 255, 0.8), 0 0 40px rgba(255, 255, 255, 0.6);
         }
 
-        .canvas-background {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 1;
+        /* Quantum Grid Background */
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; z-index: 1; opacity: 0.15;
+            background-image: 
+                linear-gradient(var(--school-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--school-color) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 10s linear infinite;
+        }
+        @keyframes gridMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 50px 50px; }
         }
 
+        /* Canvas Container */
+        .canvas-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 2; 
+        }
+        #aurora-canvas { mix-blend-mode: screen; }
+        #particle-canvas { mix-blend-mode: normal; }
+        .canvas-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+        /* Main Content */
         .main-content {
-            position: relative; z-index: 2;
-            display: flex; justify-content: center; align-items: center;
-            min-height: 100vh; 
-            padding: 15px;
-        }
-
-        .timetable-container {
-            width: 100%; max-width: 1800px;
-            display: grid; grid-template-columns: repeat(7, 1fr);
-            gap: 15px;
-        }
-
-        .day-column {
-            display: flex; flex-direction: column;
-            gap: 8px; 
-            perspective: 1000px;
-        }
-
-        .day-column h2 {
-            text-align: center; font-weight: 600;
-            font-size: 1.2rem; 
-            padding-bottom: 6px;
-            margin-bottom: 2px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            text-shadow: 0 0 10px rgba(0,0,0,0.2);
-        }
-
-        .event-card {
-            padding: 12px; 
-            gap: 2px;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-            display: flex; flex-direction: column;
-            transform-style: preserve-3d;
-            transition: transform 0.1s ease-out;
-            position: relative;
-            overflow: hidden; 
-            border: 1px solid transparent; 
-        }
-        
-        .event-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(110deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s;
-        }
-        .event-card:hover::before {
-            left: 100%;
-        }
-        .event-card:hover {
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .event-card.school { border-left: 5px solid var(--school-color); }
-        .event-card.tutor { border-left: 5px solid var(--tutor-color); }
-        .event-card.personal { border-left: 5px solid var(--personal-color); }
-
-        .event-time, .event-title, .event-location { transform: translateZ(20px); }
-        
-        .event-time { font-weight: 600; font-size: 0.85rem; }
-        .event-title { font-weight: 700; font-size: 0.9rem; color: #fff; }
-        .event-location { font-weight: 300; font-size: 0.75rem; color: var(--sub-text-color); }
-
-        .special-day {
-            height: 100%; display: flex; flex-direction: column;
+            position: relative; z-index: 100; display: flex;
             justify-content: center; align-items: center;
-            font-size: 2rem; font-weight: 700;
-            text-align: center; line-height: 1.3;
+            min-height: 100vh; padding: 20px; perspective: 2000px;
         }
+
+        /* Header */
+        .header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            padding: 20px; background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 100%);
+            text-align: center;
+        }
+        .header h1 {
+            font-family: 'Orbitron', monospace; font-size: 2.5rem; font-weight: 900;
+            background: linear-gradient(45deg, var(--school-color), var(--tutor-color), var(--personal-color));
+            -webkit-background-clip: text; background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(0, 255, 204, 0.5);
+        }
+
+        /* Digital Clock */
+        .digital-clock {
+            position: fixed; top: 80px; right: 30px; z-index: 1000;
+            font-family: 'Orbitron', monospace; font-size: 1.5rem;
+            color: var(--school-color); text-shadow: 0 0 10px currentColor;
+        }
+
+        /* Timetable Container */
+        .timetable-wrapper {
+            width: 100%; max-width: 1900px; margin-top: 100px;
+            transform-style: preserve-3d;
+        }
+        .timetable-container {
+            display: grid; grid-template-columns: repeat(7, 1fr);
+            gap: 15px; transform-style: preserve-3d;
+        }
+
+        /* Day Column */
+        .day-column {
+            display: flex; flex-direction: column; gap: 10px;
+            transform-style: preserve-3d; transition: transform 0.5s;
+        }
+        .day-column:hover { transform: translateZ(30px); }
+        .day-header {
+            text-align: center; padding: 12px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            border-radius: 12px; backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .day-header h2 {
+            font-family: 'Orbitron', monospace; font-weight: 700;
+            font-size: 1.2rem; text-transform: uppercase; letter-spacing: 2px;
+        }
+
+        /* Event Cards */
+        .event-card {
+            position: relative; padding: 14px; border-radius: 12px;
+            background: rgba(10, 10, 20, 0.5);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transform-style: preserve-3d;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+        .event-card::before { /* Hiệu ứng viền xoay */
+            content: ''; position: absolute; z-index: -1;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: conic-gradient(
+                transparent,
+                rgba(var(--card-rgb), 0.5),
+                transparent 30%
+            );
+            animation: borderRotate 4s linear infinite;
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .event-card:hover::before { opacity: 1; }
+        @keyframes borderRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        
+        .event-card.school { --card-color: var(--school-color); --card-rgb: var(--school-rgb); }
+        .event-card.tutor { --card-color: var(--tutor-color); --card-rgb: var(--tutor-rgb); }
+        .event-card.personal { --card-color: var(--personal-color); --card-rgb: var(--personal-rgb); }
+
+        .event-card:hover {
+            transform: translateY(-5px) translateZ(20px) rotateX(-5deg);
+            box-shadow: 0 20px 60px rgba(var(--card-rgb), 0.3);
+        }
+
+        /* Event Content */
+        .event-badge {
+            position: absolute; top: 10px; right: 10px; width: 8px; height: 8px;
+            border-radius: 50%; background: var(--card-color);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 5px var(--card-color); }
+            50% { transform: scale(1.5); box-shadow: 0 0 15px var(--card-color); }
+        }
+        .event-time {
+            font-weight: 700; font-size: 0.9rem; color: var(--card-color);
+            margin-bottom: 4px;
+        }
+        .event-title { font-weight: 600; font-size: 1rem; margin-bottom: 4px; }
+        .event-location { font-size: 0.8rem; color: var(--sub-text-color); }
+
+        /* Special Day */
+        .special-day {
+            height: 100%; min-height: 150px; display: flex;
+            justify-content: center; align-items: center;
+        }
+        .special-text {
+            font-size: 2.2rem; font-weight: 900; font-family: 'Orbitron', monospace;
+            text-align: center;
+        }
+
+        /* Music Visualizer */
+        .music-visualizer {
+            position: fixed; bottom: 30px; left: 30px; z-index: 1000;
+            display: flex; gap: 3px; align-items: flex-end; height: 40px;
+        }
+        .bar {
+            width: 4px; background: linear-gradient(to top, var(--school-color), var(--tutor-color));
+            border-radius: 2px; animation: dance 1s ease-in-out infinite;
+        }
+        .bar:nth-child(1) { animation-delay: 0s; } .bar:nth-child(2) { animation-delay: 0.1s; }
+        .bar:nth-child(3) { animation-delay: 0.2s; } .bar:nth-child(4) { animation-delay: 0.3s; }
+        .bar:nth-child(5) { animation-delay: 0.4s; }
+        @keyframes dance { 0%, 100% { height: 10px; } 50% { height: 100%; } }
     </style>
 </head>
 <body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loader">
+        <div class="loader">
+            <div class="loader-ring"></div>
+            <div class="loader-ring"></div>
+            <div class="loader-ring"></div>
+        </div>
+    </div>
+
+    <!-- Cursor Elements -->
     <div class="cursor"></div>
+    
+    <!-- Canvas Container -->
+    <div class="canvas-container">
+        <canvas id="aurora-canvas" class="canvas-layer"></canvas>
+        <canvas id="particle-canvas" class="canvas-layer"></canvas>
+    </div>
 
-    <canvas id="aurora-canvas" class="canvas-background"></canvas>
-    <canvas id="particle-canvas" class="canvas-background"></canvas>
+    <!-- Header -->
+    <div class="header">
+        <h1>QUANTUM SCHEDULE</h1>
+    </div>
 
+    <!-- Digital Clock -->
+    <div class="digital-clock" id="clock">00:00:00</div>
+
+    <!-- Music Visualizer -->
+    <div class="music-visualizer">
+        <div class="bar"></div> <div class="bar"></div> <div class="bar"></div>
+        <div class="bar"></div> <div class="bar"></div>
+    </div>
+
+    <!-- Main Content -->
     <div class="main-content">
-        <div class="timetable-container">
-            <div class="day-column">
-                <h2>Thứ Hai</h2>
-                <div class="event-card school">
-                    <div class="event-time">6:45 - 7:45</div>
-                    <div class="event-title">🍃 Cầu lông 1</div>
-                    <div class="event-location">Nhà thi đấu</div>
+        <div class="timetable-wrapper">
+            <div class="timetable-container">
+                <!-- Dữ liệu HTML giữ nguyên -->
+                <div class="day-column">
+                    <div class="day-header"><h2>Thứ Hai</h2></div>
+                    <div class="event-card school"><div class="event-badge"></div><div class="event-time">6:45 - 7:45</div><div class="event-title">🏸 Cầu lông 1</div><div class="event-location">Nhà thi đấu</div></div>
+                    <div class="event-card school"><div class="event-badge"></div><div class="event-time">8:25 - 10:05</div><div class="event-title">💻 PP tính & MATLAB</div><div class="event-location">D9-201</div></div>
+                    <div class="event-card school"><div class="event-badge"></div><div class="event-time">14:10 - 15:50</div><div class="event-title">💻 PP tính & MATLAB</div><div class="event-location">TVTQB-922</div></div>
+                    <div class="event-card tutor"><div class="event-badge"></div><div class="event-time">17:30 - 19:30</div><div class="event-title">📚 Gia sư Bình</div><div class="event-location">Định Công</div></div>
+                    <div class="event-card personal"><div class="event-badge"></div><div class="event-time">23:00 - 24:00</div><div class="event-title">🎮 Parsec</div><div class="event-location">Online</div></div>
                 </div>
-                <div class="event-card school">
-                    <div class="event-time">8:25 - 10:05</div>
-                    <div class="event-title">🍃 PP tính & MATLAB</div>
-                    <div class="event-location">D9-201</div>
+                <div class="day-column">
+                    <div class="day-header"><h2>Thứ Ba</h2></div>
+                    <div class="event-card school"><div class="event-badge"></div><div class="event-time">6:45 - 8:15</div><div class="event-title">⚡ Vật lý ĐC II</div><div class="event-location">D9-301</div></div>
+                    <div class="event-card school"><div class="event-badge"></div><div class="event-time">8:25 - 11:45</div><div class="event-title">📊 Xác suất thống kê</div><div class="event-location">D9-101</div></div>
+                    <div class="event-card school"><div class="event-badge"></div><div class="event-time">13:00 - 15:05</div><div class="event-title">⚡ Vật lý ĐC II</div><div class="event-location">D3-506</div></div>
+                    <div class="event-card school"><div class="event-badge"></div><div class="event-time">15:05 - 17:30</div><div class="event-title">📡 Tín hiệu & hệ thống</div><div class="event-location">D4-404</div></div>
+                    <div class="event-card tutor"><div class="event-badge"></div><div class="event-time">19:00 - 21:00</div><div class="event-title">📚 Gia sư Bình</div><div class="event-location">Định Công</div></div>
+                    <div class="event-card personal"><div class="event-badge"></div><div class="event-time">23:00 - 24:00</div><div class="event-title">🎮 Parsec</div><div class="event-location">Online</div></div>
                 </div>
-                <div class="event-card school">
-                    <div class="event-time">14:10 - 15:50</div>
-                    <div class="event-title">🍃 PP tính & MATLAB</div>
-                    <div class="event-location">TVTQB-922</div>
+                <div class="day-column">
+                    <div class="day-header"><h2>Thứ Tư</h2></div>
+                    <div class="event-card school"><div class="event-badge"></div><div class="event-time">8:25 - 10:05</div><div class="event-title">⚡ Vật lý ĐC II</div><div class="event-location">D3-405</div></div>
+                    <div class="event-card school"><div class="event-badge"></div><div class="event-time">14:00 - 15:30</div><div class="event-title">🔌 LT mạch điện I</div><div class="event-location">C7-E303</div></div>
+                    <div class="event-card school"><div class="event-badge"></div><div class="event-time">15:30 - 16:30</div><div class="event-title">🏓 Bóng bàn 1</div><div class="event-location">Nhà thi đấu</div></div>
+                    <div class="event-card tutor"><div class="event-badge"></div><div class="event-time">19:00 - 21:00</div><div class="event-title">📚 Gia sư Chi & Sa</div><div class="event-location">Lĩnh Nam & Lạc Trung</div></div>
+                    <div class="event-card personal"><div class="event-badge"></div><div class="event-time">23:00 - 24:00</div><div class="event-title">🎮 Parsec</div><div class="event-location">Online</div></div>
                 </div>
-                <div class="event-card tutor">
-                    <div class="event-time">17:30 - 19:30</div>
-                    <div class="event-title">🌸 Gia sư Bình</div>
-                    <div class="event-location">Định Công</div>
+                <div class="day-column">
+                    <div class="day-header"><h2>Thứ Năm</h2></div>
+                    <div class="event-card school"><div class="event-badge"></div><div class="event-time">6:45 - 9:10</div><div class="event-title">📖 TT Hồ Chí Minh</div><div class="event-location">D3-5-301</div></div>
+                    <div class="event-card school"><div class="event-badge"></div><div class="event-time">9:15 - 11:30</div><div class="event-title">📡 Tín hiệu & hệ thống</div><div class="event-location">C7-E412</div></div>
+                    <div class="event-card school"><div class="event-badge"></div><div class="event-time">12:30 - 14:55</div><div class="event-title">💼 Kỹ năng mềm</div><div class="event-location">D5-304</div></div>
+                    <div class="event-card school"><div class="event-badge"></div><div class="event-time">15:05 - 17:30</div><div class="event-title">🔌 LT mạch điện I</div><div class="event-location">D7-203</div></div>
+                    <div class="event-card personal"><div class="event-badge"></div><div class="event-time">23:00 - 24:00</div><div class="event-title">🎮 Parsec</div><div class="event-location">Online</div></div>
                 </div>
-                <div class="event-card personal">
-                    <div class="event-time">23:00 - 24:00</div>
-                    <div class="event-title">🌙 Parsec</div>
+                <div class="day-column">
+                    <div class="day-header"><h2>Thứ Sáu</h2></div>
+                    <div class="event-card special-day"><div class="special-text">✨<br>Relax Day!</div></div>
+                    <div class="event-card personal"><div class="event-badge"></div><div class="event-time">23:00 - 24:00</div><div class="event-title">🎮 Parsec</div><div class="event-location">Online</div></div>
                 </div>
-            </div>
-
-            <!-- Thứ 3 -->
-            <div class="day-column">
-                <h2>Thứ Ba</h2>
-                <div class="event-card school">
-                    <div class="event-time">6:45 - 8:15</div>
-                    <div class="event-title">🍃 Vật lý ĐC II</div>
-                    <div class="event-location">D9-301</div>
+                <div class="day-column">
+                    <div class="day-header"><h2>Thứ Bảy</h2></div>
+                    <div class="event-card tutor"><div class="event-badge"></div><div class="event-time">14:00 - 16:00</div><div class="event-title">📚 Gia sư Vy</div><div class="event-location">Đê La Thành</div></div>
+                    <div class="event-card tutor"><div class="event-badge"></div><div class="event-time">19:00 - 21:00</div><div class="event-title">📚 Gia sư Bình</div><div class="event-location">Định Công</div></div>
+                    <div class="event-card personal"><div class="event-badge"></div><div class="event-time">23:00 - 24:00</div><div class="event-title">🎮 Parsec</div><div class="event-location">Online</div></div>
                 </div>
-                <div class="event-card school">
-                    <div class="event-time">8:25 - 11:45</div>
-                    <div class="event-title">🍃 Xác suất thống kê</div>
-                    <div class="event-location">D9-101</div>
-                </div>
-                <div class="event-card school">
-                    <div class="event-time">13:00 - 15:05</div>
-                    <div class="event-title">🍃 Vật lý ĐC II</div>
-                    <div class="event-location">D3-506</div>
-                </div>
-                <div class="event-card school">
-                    <div class="event-time">15:05 - 17:30</div>
-                    <div class="event-title">🍃 Tín hiệu & hệ thống</div>
-                    <div class="event-location">D4-404</div>
-                </div>
-                <div class="event-card tutor">
-                    <div class="event-time">19:00 - 21:00</div>
-                    <div class="event-title">🌸 Gia sư Bình</div>
-                    <div class="event-location">Định Công</div>
-                </div>
-                <div class="event-card personal">
-                    <div class="event-time">23:00 - 24:00</div>
-                    <div class="event-title">🌙 Parsec</div>
-                </div>
-            </div>
-
-            <!-- Thứ 4 -->
-            <div class="day-column">
-                <h2>Thứ Tư</h2>
-                <div class="event-card school">
-                    <div class="event-time">8:25 - 10:05</div>
-                    <div class="event-title">🍃 Vật lý ĐC II</div>
-                    <div class="event-location">D3-405</div>
-                </div>
-                <div class="event-card school">
-                    <div class="event-time">14:00 - 15:30</div>
-                    <div class="event-title">🍃 LT mạch điện I</div>
-                    <div class="event-location">C7-E303</div>
-                </div>
-                <div class="event-card school">
-                    <div class="event-time">15:30 - 16:30</div>
-                    <div class="event-title">🍃 Bóng bàn 1</div>
-                    <div class="event-location">Nhà thi đấu</div>
-                </div>
-                <div class="event-card tutor">
-                    <div class="event-time">19:00 - 23:00</div>
-                    <div class="event-title">🌸 Gia sư Chi & Sa</div>
-                    <div class="event-location">Lĩnh Nam & Lạc Trung</div>
-                </div>
-                <div class="event-card personal">
-                    <div class="event-time">23:00 - 24:00</div>
-                    <div class="event-title">🌙 Parsec</div>
-                </div>
-            </div>
-
-            <!-- Thứ 5 -->
-            <div class="day-column">
-                <h2>Thứ Năm</h2>
-                <div class="event-card school">
-                    <div class="event-time">6:45 - 9:10</div>
-                    <div class="event-title">🍃 TT Hồ Chí Minh</div>
-                    <div class="event-location">D3-5-301</div>
-                </div>
-                <div class="event-card school">
-                    <div class="event-time">9:15 - 11:30</div>
-                    <div class="event-title">🍃 Tín hiệu & hệ thống</div>
-                    <div class="event-location">C7-E412</div>
-                </div>
-                <div class="event-card school">
-                    <div class="event-time">12:30 - 14:55</div>
-                    <div class="event-title">🍃 Kỹ năng mềm</div>
-                    <div class="event-location">D5-304</div>
-                </div>
-                <div class="event-card school">
-                    <div class="event-time">15:05 - 17:30</div>
-                    <div class="event-title">🍃 LT mạch điện I</div>
-                    <div class="event-location">D7-203</div>
-                </div>
-                <div class="event-card personal">
-                    <div class="event-time">23:00 - 24:00</div>
-                    <div class="event-title">🌙 Parsec</div>
-                </div>
-            </div>
-
-            <!-- Thứ 6 -->
-            <div class="day-column">
-                <h2>Thứ Sáu</h2>
-                <div class="event-card special-day">
-                    ✨<br>Relax Day!
-                </div>
-                 <div class="event-card personal">
-                    <div class="event-time">23:00 - 24:00</div>
-                    <div class="event-title">🌙 Parsec</div>
-                </div>
-            </div>
-
-            <!-- Thứ 7 -->
-            <div class="day-column">
-                <h2>Thứ Bảy</h2>
-                <div class="event-card tutor">
-                    <div class="event-time">14:00 - 16:00</div>
-                    <div class="event-title">🌸 Gia sư Vy</div>
-                    <div class="event-location">Đê La Thành</div>
-                </div>
-                <div class="event-card tutor">
-                    <div class="event-time">19:00 - 21:00</div>
-                    <div class="event-title">🌸 Gia sư Bình</div>
-                    <div class="event-location">Định Công</div>
-                </div>
-                 <div class="event-card personal">
-                    <div class="event-time">23:00 - 24:00</div>
-                    <div class="event-title">🌙 Parsec</div>
-                </div>
-            </div>
-
-            <!-- Chủ Nhật -->
-            <div class="day-column">
-                <h2>Chủ Nhật</h2>
-                <div class="event-card special-day">
-                    💖<br>Me Time!
-                </div>
-                 <div class="event-card personal">
-                    <div class="event-time">23:00 - 24:00</div>
-                    <div class="event-title">🌙 Parsec</div>
+                <div class="day-column">
+                    <div class="day-header"><h2>Chủ Nhật</h2></div>
+                    <div class="event-card special-day"><div class="special-text">💖<br>Me Time!</div></div>
+                    <div class="event-card personal"><div class="event-badge"></div><div class="event-time">23:00 - 24:00</div><div class="event-title">🎮 Parsec</div><div class="event-location">Online</div></div>
                 </div>
             </div>
         </div>
@@ -301,35 +321,23 @@
 
     <script id="vertex-shader" type="x-shader/x-vertex">
         attribute vec2 a_position;
-        void main() {
-            gl_Position = vec4(a_position, 0.0, 1.0);
-        }
+        void main() { gl_Position = vec4(a_position, 0.0, 1.0); }
     </script>
-
     <script id="fragment-shader" type="x-shader/x-fragment">
-        precision mediump float;
+        precision highp float;
         uniform vec2 u_resolution;
         uniform float u_time;
 
-        float random(vec2 st) {
-            return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
-        }
-
+        float random(vec2 st) { return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123); }
         float noise(vec2 st) {
-            vec2 i = floor(st);
-            vec2 f = fract(st);
-            float a = random(i);
-            float b = random(i + vec2(1.0, 0.0));
-            float c = random(i + vec2(0.0, 1.0));
-            float d = random(i + vec2(1.0, 1.0));
+            vec2 i = floor(st); vec2 f = fract(st);
             vec2 u = f * f * (3.0 - 2.0 * f);
-            return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.y * u.x;
+            return mix(mix(random(i + vec2(0.0, 0.0)), random(i + vec2(1.0, 0.0)), u.x),
+                       mix(random(i + vec2(0.0, 1.0)), random(i + vec2(1.0, 1.0)), u.x), u.y);
         }
 
         void main() {
             vec2 uv = gl_FragCoord.xy / u_resolution.xy;
-            uv.y *= 2.0;
-            
             float time = u_time * 0.1;
             float intensity = 0.0;
             
@@ -348,120 +356,216 @@
         }
     </script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
     <script>
-        const cursor = document.querySelector('.cursor');
-        const cards = document.querySelectorAll('.event-card');
-        window.addEventListener('mousemove', e => {
-            cursor.style.left = e.clientX + 'px';
-            cursor.style.top = e.clientY + 'px';
-        });
-        cards.forEach(card => {
-            card.addEventListener('mouseenter', () => cursor.classList.add('grow'));
-            card.addEventListener('mousemove', e => {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left - rect.width / 2;
-                const y = e.clientY - rect.top - rect.height / 2;
-                const rotateY = (x / rect.width) * 15;
-                const rotateX = (y / rect.height) * -15;
-                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
-            });
-            card.addEventListener('mouseleave', () => {
-                cursor.classList.remove('grow');
-                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
-            });
-        });
         document.addEventListener('DOMContentLoaded', () => {
-            gsap.set(".day-column", { opacity: 0, y: 50 });
-            const tl = gsap.timeline({ delay: 0.5 });
-            tl.to(".day-column", { opacity: 1, y: 0, duration: 0.8, stagger: 0.1, ease: "power2.out" });
+            // --- ELEMENTS ---
+            const loader = document.getElementById('loader');
+            const clock = document.getElementById('clock');
+            const cursor = document.querySelector('.cursor'); // NÂNG CẤP 1: Đổi lại con trỏ
+            const auroraCanvas = document.getElementById('aurora-canvas');
+            const particleCanvas = document.getElementById('particle-canvas');
+            const pCtx = particleCanvas.getContext('2d');
+            const gl = auroraCanvas.getContext('webgl');
+
+            // --- STATE ---
+            let mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+            let particles = [];
+            let isHyperspaceActive = false;
+
+            // --- 1. INITIALIZATION ---
+            function init() {
+                setTimeout(() => loader.classList.add('hidden'), 1000);
+                
+                updateClock();
+                setInterval(updateClock, 1000);
+
+                window.addEventListener('mousemove', onMouseMove);
+                window.addEventListener('mousedown', () => { isHyperspaceActive = true; });
+                window.addEventListener('mouseup', () => { isHyperspaceActive = false; });
+
+                addHoverListeners();
+                
+                initWebGL();
+                resize();
+                window.addEventListener('resize', resize);
+
+                animate();
+            }
+
+            function resize() {
+                auroraCanvas.width = particleCanvas.width = window.innerWidth;
+                auroraCanvas.height = particleCanvas.height = window.innerHeight;
+                gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+                createParticles();
+            }
+
+            // --- 2. UI & CURSOR ---
+            function updateClock() {
+                clock.textContent = new Date().toLocaleTimeString('en-GB');
+            }
+
+            function onMouseMove(e) {
+                mouse.x = e.clientX;
+                mouse.y = e.clientY;
+                // NÂNG CẤP 1: Di chuyển con trỏ mới
+                gsap.to(cursor, { duration: 0.3, x: mouse.x, y: mouse.y, ease: "power2.out" });
+            }
+
+            function addHoverListeners() {
+                document.querySelectorAll('.event-card, .day-header').forEach(el => {
+                    // NÂNG CẤP 1: Thay đổi class cho con trỏ mới
+                    el.addEventListener('mouseenter', () => cursor.classList.add('grow'));
+                    el.addEventListener('mouseleave', () => cursor.classList.remove('grow'));
+                });
+            }
+
+            // --- 3. CANVAS 2D: PARTICLES & EFFECTS ---
+            function createParticles() {
+                particles = [];
+                let numberOfParticles = (particleCanvas.width * particleCanvas.height) / 15000;
+                for (let i = 0; i < numberOfParticles; i++) {
+                    particles.push(new Particle());
+                }
+            }
+
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * particleCanvas.width;
+                    this.y = Math.random() * particleCanvas.height;
+                    this.size = Math.random() * 1.5 + 0.5;
+                    this.speedX = (Math.random() * 0.4) - 0.2;
+                    this.speedY = (Math.random() * 0.4) - 0.2;
+                    this.opacity = Math.random() * 0.5 + 0.3;
+                    this.prevX = this.x;
+                    this.prevY = this.y;
+                }
+                update() {
+                    this.prevX = this.x;
+                    this.prevY = this.y;
+
+                    if (isHyperspaceActive) {
+                        let dx = mouse.x - this.x;
+                        let dy = mouse.y - this.y;
+                        this.speedX += dx * 0.005;
+                        this.speedY += dy * 0.005;
+                        this.speedX *= 0.95;
+                        this.speedY *= 0.95;
+                    } else {
+                        const mouseRadius = 150;
+                        let dx = mouse.x - this.x;
+                        let dy = mouse.y - this.y;
+                        let distance = Math.sqrt(dx * dx + dy * dy);
+
+                        if (distance < mouseRadius) {
+                            const force = (mouseRadius - distance) / mouseRadius;
+                            this.x -= (dx / distance) * force * 2;
+                            this.y -= (dy / distance) * force * 2;
+                        }
+                    }
+
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    if (this.x < 0 || this.x > particleCanvas.width) this.speedX *= -1;
+                    if (this.y < 0 || this.y > particleCanvas.height) this.speedY *= -1;
+                }
+                draw() {
+                    if (isHyperspaceActive) {
+                        pCtx.strokeStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                        pCtx.lineWidth = this.size;
+                        pCtx.beginPath();
+                        pCtx.moveTo(this.prevX, this.prevY);
+                        pCtx.lineTo(this.x, this.y);
+                        pCtx.stroke();
+                    } else {
+                        pCtx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                        pCtx.beginPath();
+                        pCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                        pCtx.fill();
+                    }
+                }
+            }
+
+            function connectParticles() {
+                const connectDistance = particleCanvas.width / 10;
+                for (let a = 0; a < particles.length; a++) {
+                    for (let b = a; b < particles.length; b++) {
+                        let dx = particles[a].x - particles[b].x;
+                        let dy = particles[a].y - particles[b].y;
+                        let distance = Math.sqrt(dx * dx + dy * dy);
+
+                        if (distance < connectDistance) {
+                            const opacity = 1 - (distance / connectDistance);
+                            pCtx.strokeStyle = `rgba(255, 255, 255, ${opacity * 0.5})`;
+                            pCtx.lineWidth = 0.5;
+                            pCtx.beginPath();
+                            pCtx.moveTo(particles[a].x, particles[a].y);
+                            pCtx.lineTo(particles[b].x, particles[b].y);
+                            pCtx.stroke();
+                        }
+                    }
+                }
+            }
+
+            function handleCanvas2D() {
+                pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+                
+                for (let i = 0; i < particles.length; i++) {
+                    particles[i].update();
+                    particles[i].draw();
+                }
+                
+                if (!isHyperspaceActive) {
+                    connectParticles();
+                }
+            }
+
+            // --- 4. CANVAS WEBGL: AURORA SHADER ---
+            let time = 0, program, uTime, uResolution;
+            function initWebGL() {
+                const vsSource = document.getElementById('vertex-shader').textContent;
+                const fsSource = document.getElementById('fragment-shader').textContent;
+                const vs = compileShader(gl.VERTEX_SHADER, vsSource);
+                const fs = compileShader(gl.FRAGMENT_SHADER, fsSource);
+                program = gl.createProgram();
+                gl.attachShader(program, vs);
+                gl.attachShader(program, fs);
+                gl.linkProgram(program);
+                gl.useProgram(program);
+                
+                const buffer = gl.createBuffer();
+                gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+                
+                const aPosition = gl.getAttribLocation(program, 'a_position');
+                gl.enableVertexAttribArray(aPosition);
+                gl.vertexAttribPointer(aPosition, 2, gl.FLOAT, false, 0, 0);
+                
+                uTime = gl.getUniformLocation(program, 'u_time');
+                uResolution = gl.getUniformLocation(program, 'u_resolution');
+            }
+            function compileShader(type, source) {
+                const shader = gl.createShader(type);
+                gl.shaderSource(shader, source);
+                gl.compileShader(shader);
+                return shader;
+            }
+            function renderWebGL(now) {
+                time = now / 1000;
+                gl.uniform1f(uTime, time);
+                gl.uniform2f(uResolution, gl.canvas.width, gl.canvas.height);
+                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            }
+
+            // --- 5. MAIN ANIMATION LOOP ---
+            function animate(now) {
+                handleCanvas2D();
+                renderWebGL(now);
+                requestAnimationFrame(animate);
+            }
+
+            init();
         });
-
-        const particleCanvas = document.getElementById('particle-canvas');
-        const pCtx = particleCanvas.getContext('2d');
-        particleCanvas.width = window.innerWidth;
-        particleCanvas.height = window.innerHeight;
-        let particlesArray;
-        const mouse = { x: null, y: null, radius: (particleCanvas.height / 100) * (particleCanvas.width / 100) };
-        window.addEventListener('mousemove', event => { mouse.x = event.x; mouse.y = event.y; });
-        class Particle {  
-            constructor(x, y, directionX, directionY, size, color) { this.x = x; this.y = y; this.directionX = directionX; this.directionY = directionY; this.size = size; this.color = color; }
-            draw() { pCtx.beginPath(); pCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false); pCtx.fillStyle = 'rgba(200, 220, 255, 0.6)'; pCtx.fill(); }
-            update() { if (this.x > particleCanvas.width || this.x < 0) { this.directionX = -this.directionX; } if (this.y > particleCanvas.height || this.y < 0) { this.directionY = -this.directionY; } let dx = mouse.x - this.x; let dy = mouse.y - this.y; let distance = Math.sqrt(dx * dx + dy * dy); if (distance < mouse.radius + this.size) { if (mouse.x < this.x && this.x < particleCanvas.width - this.size * 10) { this.x += 3; } if (mouse.x > this.x && this.x > this.size * 10) { this.x -= 3; } if (mouse.y < this.y && this.y < particleCanvas.height - this.size * 10) { this.y += 3; } if (mouse.y > this.y && this.y > this.size * 10) { this.y -= 3; } } this.x += this.directionX; this.y += this.directionY; this.draw(); }
-        }
-        function initParticles() { particlesArray = []; let numberOfParticles = (particleCanvas.height * particleCanvas.width) / 12000; for (let i = 0; i < numberOfParticles; i++) { let size = (Math.random() * 1.5) + 0.5; let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2); let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2); let directionX = (Math.random() * 0.3) - 0.15; let directionY = (Math.random() * 0.3) - 0.15; particlesArray.push(new Particle(x, y, directionX, directionY, size, '#FFFFFF')); } }
-        function connectParticles() {  
-            let opacityValue = 1; for (let a = 0; a < particlesArray.length; a++) { for (let b = a; b < particlesArray.length; b++) { let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x)) + ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y)); if (distance < (particleCanvas.width / 8) * (particleCanvas.height / 8)) { opacityValue = 1 - (distance / 20000); pCtx.strokeStyle = 'rgba(140, 180, 255,' + opacityValue + ')'; pCtx.lineWidth = 0.5; pCtx.beginPath(); pCtx.moveTo(particlesArray[a].x, particlesArray[a].y); pCtx.lineTo(particlesArray[b].x, particlesArray[b].y); pCtx.stroke(); } } }
-        }
-        function animateParticles() { requestAnimationFrame(animateParticles); pCtx.clearRect(0, 0, innerWidth, innerHeight); for (let i = 0; i < particlesArray.length; i++) { particlesArray[i].update(); } connectParticles(); }
-        initParticles(); animateParticles();
-
-        const auroraCanvas = document.getElementById('aurora-canvas');
-        const gl = auroraCanvas.getContext('webgl');
-        let time = 0;
-        let buffer, program;
-        let uTime, uResolution;
-
-        function resize() {
-            auroraCanvas.width = window.innerWidth;
-            auroraCanvas.height = window.innerHeight;
-            gl.viewport(0, 0, auroraCanvas.width, auroraCanvas.height);
-            particleCanvas.width = window.innerWidth;
-            particleCanvas.height = window.innerHeight;
-            initParticles();
-        }
-        window.addEventListener('resize', resize);
-
-        function compileShader(type, source) {
-            const shader = gl.createShader(type);
-            gl.shaderSource(shader, source);
-            gl.compileShader(shader);
-            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-                console.error('Shader compilation error:', gl.getShaderInfoLog(shader));
-            }
-            return shader;
-        }
-
-        function setup() {
-            const vsSource = document.getElementById('vertex-shader').textContent;
-            const fsSource = document.getElementById('fragment-shader').textContent;
-            const vs = compileShader(gl.VERTEX_SHADER, vsSource);
-            const fs = compileShader(gl.FRAGMENT_SHADER, fsSource);
-
-            program = gl.createProgram();
-            gl.attachShader(program, vs);
-            gl.attachShader(program, fs);
-            gl.linkProgram(program);
-            if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-                console.error('Program linking error:', gl.getProgramInfoLog(program));
-            }
-
-            gl.useProgram(program);
-            buffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
-
-            const aPosition = gl.getAttribLocation(program, 'a_position');
-            gl.enableVertexAttribArray(aPosition);
-            gl.vertexAttribPointer(aPosition, 2, gl.FLOAT, false, 0, 0);
-
-            uTime = gl.getUniformLocation(program, 'u_time');
-            uResolution = gl.getUniformLocation(program, 'u_resolution');
-        }
-
-        function loop(now) {
-            time = now / 1000;
-            gl.uniform1f(uTime, time);
-            gl.uniform2f(uResolution, auroraCanvas.width, auroraCanvas.height);
-            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-            requestAnimationFrame(loop);
-        }
-
-        setup();
-        resize();
-        loop(0);
     </script>
 </body>
 </html>
-
-
