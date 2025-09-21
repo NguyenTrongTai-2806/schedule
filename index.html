@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thời Khóa Biểu: Phiên Bản Thiên Hà</title>
+    <title>Thời Khóa Biểu: Phiên Bản Thiên Hà (Siêu Gọn)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -43,7 +43,6 @@
             box-shadow: 0 0 25px rgba(255, 255, 255, 0.8), 0 0 40px rgba(255, 255, 255, 0.6);
         }
 
-        
         .canvas-background {
             position: fixed;
             top: 0; left: 0;
@@ -54,40 +53,45 @@
         .main-content {
             position: relative; z-index: 2;
             display: flex; justify-content: center; align-items: center;
-            min-height: 100vh; padding: 40px;
+            min-height: 100vh; 
+            padding: 15px;
         }
 
         .timetable-container {
             width: 100%; max-width: 1800px;
             display: grid; grid-template-columns: repeat(7, 1fr);
-            gap: 20px;
+            gap: 15px;
         }
 
         .day-column {
             display: flex; flex-direction: column;
-            gap: 15px; perspective: 1000px;
+            gap: 8px; 
+            perspective: 1000px;
         }
 
         .day-column h2 {
-            text-align: center; font-weight: 600; font-size: 1.5rem;
-            padding-bottom: 10px;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            text-align: center; font-weight: 600;
+            font-size: 1.2rem; 
+            padding-bottom: 6px;
+            margin-bottom: 2px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
             text-shadow: 0 0 10px rgba(0,0,0,0.2);
         }
 
         .event-card {
-            padding: 20px; border-radius: 15px;
+            padding: 12px; 
+            gap: 2px;
+            border-radius: 10px;
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-            display: flex; flex-direction: column; gap: 8px;
+            display: flex; flex-direction: column;
             transform-style: preserve-3d;
             transition: transform 0.1s ease-out;
             position: relative;
             overflow: hidden; 
             border: 1px solid transparent; 
         }
-        
         
         .event-card::before {
             content: '';
@@ -104,20 +108,20 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-
         .event-card.school { border-left: 5px solid var(--school-color); }
         .event-card.tutor { border-left: 5px solid var(--tutor-color); }
         .event-card.personal { border-left: 5px solid var(--personal-color); }
 
         .event-time, .event-title, .event-location { transform: translateZ(20px); }
-        .event-time { font-weight: 600; font-size: 1rem; }
-        .event-title { font-weight: 700; font-size: 1.1rem; color: #fff; }
-        .event-location { font-weight: 300; font-size: 0.9rem; color: var(--sub-text-color); }
+        
+        .event-time { font-weight: 600; font-size: 0.85rem; }
+        .event-title { font-weight: 700; font-size: 0.9rem; color: #fff; }
+        .event-location { font-weight: 300; font-size: 0.75rem; color: var(--sub-text-color); }
 
         .special-day {
             height: 100%; display: flex; flex-direction: column;
             justify-content: center; align-items: center;
-            font-size: 2.5rem; font-weight: 700;
+            font-size: 2rem; font-weight: 700;
             text-align: center; line-height: 1.3;
         }
     </style>
@@ -125,14 +129,11 @@
 <body>
     <div class="cursor"></div>
 
-    
     <canvas id="aurora-canvas" class="canvas-background"></canvas>
-    
     <canvas id="particle-canvas" class="canvas-background"></canvas>
 
     <div class="main-content">
         <div class="timetable-container">
-            
             <div class="day-column">
                 <h2>Thứ Hai</h2>
                 <div class="event-card school">
@@ -298,7 +299,6 @@
         </div>
     </div>
 
-   
     <script id="vertex-shader" type="x-shader/x-vertex">
         attribute vec2 a_position;
         void main() {
@@ -306,7 +306,6 @@
         }
     </script>
 
-    
     <script id="fragment-shader" type="x-shader/x-fragment">
         precision mediump float;
         uniform vec2 u_resolution;
@@ -329,24 +328,21 @@
 
         void main() {
             vec2 uv = gl_FragCoord.xy / u_resolution.xy;
-            uv.y *= 2.0; // Kéo dãn theo chiều dọc
+            uv.y *= 2.0;
             
             float time = u_time * 0.1;
             float intensity = 0.0;
             
-            // Nhiều lớp noise để tạo sự phức tạp
             intensity += noise(uv * 2.0 + vec2(time, 0.0)) * 0.5;
             intensity += noise(uv * 4.0 + vec2(-time, time * 0.5)) * 0.25;
             intensity += noise(uv * 8.0 + vec2(time * 1.5, -time)) * 0.125;
             
-            // Tạo hình dạng dải sóng cho cực quang
             intensity *= pow(abs(0.5 - uv.y), 0.5);
             
-            // Tạo màu sắc
             vec3 color = vec3(0.0);
-            color.g = intensity * 0.5; // Màu xanh lá
-            color.b = intensity * 1.0; // Màu xanh lam
-            color += vec3(intensity * 0.2, 0.0, intensity * 0.3); // Thêm chút sắc tím/hồng
+            color.g = intensity * 0.5;
+            color.b = intensity * 1.0;
+            color += vec3(intensity * 0.2, 0.0, intensity * 0.3);
             
             gl_FragColor = vec4(color, 1.0);
         }
@@ -354,7 +350,6 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
     <script>
-        
         const cursor = document.querySelector('.cursor');
         const cards = document.querySelectorAll('.event-card');
         window.addEventListener('mousemove', e => {
@@ -382,7 +377,6 @@
             tl.to(".day-column", { opacity: 1, y: 0, duration: 0.8, stagger: 0.1, ease: "power2.out" });
         });
 
-        
         const particleCanvas = document.getElementById('particle-canvas');
         const pCtx = particleCanvas.getContext('2d');
         particleCanvas.width = window.innerWidth;
@@ -402,7 +396,6 @@
         function animateParticles() { requestAnimationFrame(animateParticles); pCtx.clearRect(0, 0, innerWidth, innerHeight); for (let i = 0; i < particlesArray.length; i++) { particlesArray[i].update(); } connectParticles(); }
         initParticles(); animateParticles();
 
-        
         const auroraCanvas = document.getElementById('aurora-canvas');
         const gl = auroraCanvas.getContext('webgl');
         let time = 0;
