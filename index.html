@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thời Khóa Biểu: Galaxy Ultra (Dynamic Layout)</title>
+    <title>Thời Khóa Biểu: Galaxy Ultra (Compact View)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
@@ -17,40 +17,21 @@
             --personal-rgb: 139, 92, 246;
             --text-color: #ffffff;
             --sub-text-color: #b8b8b8;
-            --bg-color: #0a0a14; /* Một màu nền tối hơn một chút */
+            --bg-color: #0a0a14;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Poppins', sans-serif;
-            height: 100vh; /* GIẢI PHÁP MỚI: Cố định chiều cao body */
+            min-height: 100vh;
             color: var(--text-color);
             background: var(--bg-color);
             overflow: hidden;
             cursor: none;
         }
 
-        /* --- GIẢI PHÁP MỚI: Tùy chỉnh thanh cuộn --- */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--school-color);
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #fff;
-        }
-
-        /* Các style khác giữ nguyên */
-        .loading-screen, .cursor, body::before, .canvas-container, .header, .digital-clock, .music-visualizer {
-            /* Giữ nguyên các style này */
-        }
+        /* Các style hiệu ứng nền, con trỏ, header... giữ nguyên */
         .loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10000; display: flex; justify-content: center; align-items: center; transition: opacity 1s, visibility 1s; }
         .loading-screen.hidden { opacity: 0; visibility: hidden; }
         .loader { width: 150px; height: 150px; position: relative; }
@@ -75,60 +56,56 @@
         @keyframes dance { 0%, 100% { height: 10px; } 50% { height: 100%; } }
         .event-badge { position: absolute; top: 10px; right: 10px; width: 8px; height: 8px; border-radius: 50%; background: var(--card-color); animation: pulse 2s infinite; }
         @keyframes pulse { 0%, 100% { transform: scale(1); box-shadow: 0 0 5px var(--card-color); } 50% { transform: scale(1.5); box-shadow: 0 0 15px var(--card-color); } }
-        .special-day { height: 100%; min-height: 150px; display: flex; justify-content: center; align-items: center; }
-        .special-text { font-size: 2.2rem; font-weight: 900; font-family: 'Orbitron', monospace; text-align: center; }
+        .special-day { height: 100%; min-height: 120px; /* THAY ĐỔI */ display: flex; justify-content: center; align-items: center; }
+        .special-text { font-size: 2rem; /* THAY ĐỔI */ font-weight: 900; font-family: 'Orbitron', monospace; text-align: center; }
 
-        /* --- GIẢI PHÁP MỚI: Bố cục linh hoạt --- */
+        /* --- BỐ CỤC CÔ ĐỌNG --- */
         .main-content {
             position: relative; z-index: 100; display: flex;
-            height: 100%; /* Chiếm toàn bộ chiều cao body */
-            padding: 90px 20px 20px 20px; /* Điều chỉnh padding */
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 85px 20px 15px 20px; /* THAY ĐỔI: Giảm padding trên và dưới */
             perspective: 2000px;
         }
 
         .timetable-wrapper {
             width: 100%; max-width: 1900px;
-            height: 100%; /* Cho phép wrapper co giãn */
             transform-style: preserve-3d;
         }
         
         .timetable-container {
             display: grid; grid-template-columns: repeat(7, 1fr);
             gap: 15px; 
-            height: 100%; /* Grid chiếm toàn bộ chiều cao wrapper */
             transform-style: preserve-3d;
         }
 
         .day-column {
             display: flex; flex-direction: column;
-            gap: 10px;
-            overflow-y: auto; /* ĐÂY LÀ CHÌA KHÓA: Cho phép cuộn khi nội dung quá dài */
-            padding-right: 5px; /* Thêm khoảng trống cho thanh cuộn */
+            gap: 6px; /* THAY ĐỔI: Giảm mạnh khoảng cách giữa các thẻ */
         }
         
         .day-header {
-            text-align: center; padding: 12px;
+            text-align: center; padding: 10px; /* THAY ĐỔI */
             background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
             border-radius: 12px; backdrop-filter: blur(10px);
             border: 1px solid rgba(255,255,255,0.2);
-            position: sticky; /* Giữ header ở trên cùng khi cuộn */
-            top: 0;
-            z-index: 10;
         }
         .day-header h2 {
             font-family: 'Orbitron', monospace; font-weight: 700;
-            font-size: 1.2rem; text-transform: uppercase; letter-spacing: 2px;
+            font-size: 1.1rem; /* THAY ĐỔI */
+            text-transform: uppercase; letter-spacing: 2px;
         }
 
         .event-card {
-            position: relative; padding: 14px; border-radius: 12px;
+            position: relative; padding: 10px; /* THAY ĐỔI: Giảm mạnh padding */
+            border-radius: 12px;
             background: rgba(10, 10, 20, 0.5);
             backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             transform-style: preserve-3d;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             overflow: hidden;
-            flex-shrink: 0; /* Ngăn thẻ bị co lại */
         }
         .event-card::before { content: ''; position: absolute; z-index: -1; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient( transparent, rgba(var(--card-rgb), 0.5), transparent 30% ); animation: borderRotate 4s linear infinite; opacity: 0; transition: opacity 0.3s; }
         .event-card:hover::before { opacity: 1; }
@@ -138,13 +115,22 @@
         .event-card.personal { --card-color: var(--personal-color); --card-rgb: var(--personal-rgb); }
         .event-card:hover { transform: translateY(-5px) translateZ(20px) rotateX(-5deg); box-shadow: 0 20px 60px rgba(var(--card-rgb), 0.3); }
 
-        .event-time { font-weight: 700; font-size: 0.9rem; color: var(--card-color); margin-bottom: 4px; }
-        .event-title { font-weight: 600; font-size: 1rem; margin-bottom: 4px; }
-        .event-location { font-size: 0.8rem; color: var(--sub-text-color); }
+        .event-time {
+            font-weight: 700; font-size: 0.8rem; /* THAY ĐỔI */
+            color: var(--card-color); margin-bottom: 3px;
+        }
+        .event-title {
+            font-weight: 600; font-size: 0.9rem; /* THAY ĐỔI */
+            margin-bottom: 3px;
+        }
+        .event-location {
+            font-size: 0.75rem; /* THAY ĐỔI */
+            color: var(--sub-text-color);
+        }
     </style>
 </head>
 <body>
-    <!-- Loading Screen, Cursor, Canvas, Header, Clock, Visualizer giữ nguyên -->
+    <!-- BODY và SCRIPT giữ nguyên như phiên bản trước -->
     <div class="loading-screen" id="loader"><div class="loader"><div class="loader-ring"></div><div class="loader-ring"></div><div class="loader-ring"></div></div></div>
     <div class="cursor"></div>
     <div class="canvas-container"><canvas id="aurora-canvas" class="canvas-layer"></canvas><canvas id="particle-canvas" class="canvas-layer"></canvas></div>
@@ -209,7 +195,6 @@
         </div>
     </div>
 
-    <!-- Toàn bộ SCRIPT giữ nguyên, không cần thay đổi -->
     <script id="vertex-shader" type="x-shader/x-vertex">attribute vec2 a_position; void main() { gl_Position = vec4(a_position, 0.0, 1.0); }</script>
     <script id="fragment-shader" type="x-shader/x-fragment">precision highp float; uniform vec2 u_resolution; uniform float u_time; float random(vec2 st) { return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123); } float noise(vec2 st) { vec2 i = floor(st); vec2 f = fract(st); vec2 u = f * f * (3.0 - 2.0 * f); return mix(mix(random(i + vec2(0.0, 0.0)), random(i + vec2(1.0, 0.0)), u.x), mix(random(i + vec2(0.0, 1.0)), random(i + vec2(1.0, 1.0)), u.x), u.y); } void main() { vec2 uv = gl_FragCoord.xy / u_resolution.xy; float time = u_time * 0.1; float intensity = 0.0; intensity += noise(uv * 2.0 + vec2(time, 0.0)) * 0.5; intensity += noise(uv * 4.0 + vec2(-time, time * 0.5)) * 0.25; intensity += noise(uv * 8.0 + vec2(time * 1.5, -time)) * 0.125; intensity *= pow(abs(0.5 - uv.y), 0.5); vec3 color = vec3(0.0); color.g = intensity * 0.5; color.b = intensity * 1.0; color += vec3(intensity * 0.2, 0.0, intensity * 0.3); gl_FragColor = vec4(color, 1.0); }</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
